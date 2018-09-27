@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.metrics import log_loss
 import time
 from contextlib import contextmanager
-from security_3rd_property import DATA_PATH, NUM_ROUND, skf
+from security_3rd_property import DATA_PATH, OVR_CLASS_NUM, NUM_ROUND, skf
 from security_3rd_model import xgbMultiTrain
 
 # TIME-COST FUNCTION
@@ -56,32 +56,14 @@ def main():
         print('[TRAIN LABEL DISTRIBUTION]: ')
         print(y.value_counts()) 
 
-    '''
-    with timer('5-Fold 2-Class Model Training'):    
-        # 5-fold
-        skf = StratifiedKFold(n_splits=5, random_state=4, shuffle=True)
-        # Variables
-        extra_feat_val = pd.DataFrame()
-        extra_feat_test = pd.DataFrame(np.zeros((test.shape[0], 6)), 
-                                       columns=['binaryclass_prob_'+str(i) for i in range(CLASS_NUM)])
-        # Start Training
-        for fold_i,(tr_index,val_index) in enumerate(skf.split(X, y)):
-            print('FOLD -', fold_i, ' 2-Class Start...')
-            X_train, X_val = X.iloc[tr_index,:], X.iloc[val_index,:]
-            y_train, y_val = y[tr_index], y[val_index]
-            biClassFeat_val, biClassFeat_test = xgb2classTrain(X_train, X_val, y_train, y_val, test, NUM_ROUND)
-            extra_feat_val = pd.concat([extra_feat_val, biClassFeat_val], axis=0)
-            extra_feat_test = extra_feat_test + 0.2*biClassFeat_test
-        extra_feat_val.to_csv(DATA_PATH+'/data/val_ovr_prob_features.csv')
-        extra_feat_test.to_csv(DATA_PATH+'/data/test_ovr_prob_features.csv')
-    '''
     with timer('ADD ONE_VS_REST PROB'):
         extra_feat_val = pd.read_csv(DATA_PATH + '/data/tr_lr_oof_prob.csv')
         extra_feat_test = pd.read_csv(DATA_PATH + '/data/te_lr_oof_prob.csv')
+        prob_list = ['prob'+str(i) for i in range(OVR_CLASS_NUM)]
         X_extra = pd.concat(
-            [X, extra_feat_val[['prob0', 'prob1', 'prob2', 'prob3', 'prob4', 'prob5']]], axis=1)
+            [X, extra_feat_val[prob_list]], axis=1)
         test_extra = pd.concat(
-            [test, extra_feat_test[['prob0', 'prob1', 'prob2', 'prob3', 'prob4', 'prob5']]],axis=1)
+            [test, extra_feat_test[prob_list]],axis=1)
 
 
     #        X_extra = pd.concat([X, extra_feat_val[['prob0','prob1','prob2','prob3','prob4','prob5']]], axis=1)
@@ -122,7 +104,7 @@ def main():
     
     with timer('SUBMIT CHECK'):
         rlt = pd.concat([test['file_id'], p_test_all], axis=1)    
-        rlt.columns = ['file_id', 'prob0', 'prob1', 'prob2', 'prob3', 'prob4', 'prob5']
+        rlt.columns = ['file_id'] + prob_list
         check_flag = all(rlt.iloc[:,1:].sum(axis=1)-1<1e-6)
         if check_flag:
             print('RESULT IS OK...')
