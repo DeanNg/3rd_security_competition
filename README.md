@@ -9,7 +9,7 @@ https://tianchi.aliyun.com/competition/introduction.htm?spm=5176.11165320.5678.1
 - 线上初赛：Rank5
 
 
-- 线下决赛：Rank2 (算法成绩排名Rank3,真心比不过植物大佬)
+- 线下决赛：Rank2 (算法成绩排名Rank3)
 
 
 ###目录结构:
