@@ -29,7 +29,7 @@ https://tianchi.aliyun.com/competition/introduction.htm?spm=5176.11165320.5678.1
 - security_3rd_feature.py:生成特征并保存
 - security_3rd_code.py:主代码,生成提交结果
 
-运行顺序：security_3rd_model -> security_3rd_feature -> security_3rd_code
+运行顺序：security_3rd_feature -> security_3rd_code
 
 
 ### 运行条件:
